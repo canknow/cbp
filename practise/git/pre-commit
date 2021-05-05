@@ -1,0 +1,45 @@
+#!/bin/sh
+set -e
+
+STAGE_FILES=$(git diff --cached --name-only)
+
+prefixes=("documents/" "others/")
+isOnlyDocument=true
+
+for file in ${STAGE_FILES[@]}
+do
+	fileIsInDocument=false
+
+	for prefix in ${prefixes[@]}
+	do
+		if test $file == $prefix*
+		then
+			fileIsInDocument=true
+			break
+		fi
+	done
+
+	if test $fileIsInDocument == false
+	then
+	    echo -e "file \e[1;35m $file \e[1;34m should check"
+		isOnlyDocument=false
+	fi
+done
+
+RESULT=$?
+
+if test $isOnlyDocument == true
+then
+	echo "skip check"
+	exit 0
+else
+	echo "start checking..."
+	mvn checkstyle:check
+	RESULT=$?
+	mvn clean test
+	RESULT=$?
+	mvn jacoco:check
+	RESULT=$?
+fi
+
+exit RESULT=$?

@@ -1,0 +1,11 @@
+<!-- 一般情况 maven 的通用 settings.xml 在 .m2 文件夹下, 项目内 settings.xml 也可以进行设置，优先级更高 -->
+<settings>
+    <!-- omitted xml -->
+    <servers>
+        <server>
+            <id>canknow-cbp-maven</id>
+            <username>3230525823@qq.com</username>
+            <password>lianhubo</password>
+        </server>
+    </servers>
+</settings>

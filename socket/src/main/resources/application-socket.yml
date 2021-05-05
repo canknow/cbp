@@ -1,0 +1,4 @@
+socket:
+  socket-port: 9696    #socket端口
+  ping-interval: 60000 #Ping消息间隔（毫秒）
+  ping-timeout: 180000 #Ping消息超时时间（毫秒）
