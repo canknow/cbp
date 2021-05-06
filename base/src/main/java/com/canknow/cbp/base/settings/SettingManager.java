@@ -46,7 +46,7 @@ public class SettingManager implements ISettingManager {
         insertOrUpdateOrDeleteSettingValue(name, value, null, null);
     }
 
-    private SettingInfo insertOrUpdateOrDeleteSettingValue(String name, String value, Object o, String userId) {
+    private SettingInfo insertOrUpdateOrDeleteSettingValue(String name, String value, Object object, String userId) {
         SettingDefinition settingDefinition = _settingDefinitionManager.getSettingDefinition(name);
         SettingInfo settingValue = settingStore.getSettingOrNull(name, userId);
 
