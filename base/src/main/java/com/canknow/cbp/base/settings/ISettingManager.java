@@ -12,4 +12,8 @@ public interface ISettingManager {
     List<SettingValue> getAllSettingValues();
 
     void changeSetting(String name, String value);
+
+    void changeSettingForApplication(String name, String value);
+
+    void changeSettingForUser(String userId, String name, String value);
 }

@@ -3,7 +3,9 @@ package com.canknow.cbp.base.settings;
 import com.canknow.cbp.base.runtime.session.IApplicationSession;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -19,6 +21,8 @@ public class SettingManager implements ISettingManager {
 
     @Autowired
     private IApplicationSession applicationSession;
+
+    public final static String ApplicationSettingsCacheKey = "ApplicationSettings";
 
     @Override
     public String getSettingValue(String name) {
@@ -43,10 +47,25 @@ public class SettingManager implements ISettingManager {
 
     @Override
     public void changeSetting(String name, String value) {
-        insertOrUpdateOrDeleteSettingValue(name, value, null, null);
+        insertOrUpdateOrDeleteSettingValue(name, value, null);
     }
 
-    private SettingInfo insertOrUpdateOrDeleteSettingValue(String name, String value, Object object, String userId) {
+    @Override
+    public void changeSettingForApplication(String name, String value) {
+        insertOrUpdateOrDeleteSettingValue(name, value, null);
+    }
+
+    @Override
+    public void changeSettingForUser(String userId, String name, String value) {
+        insertOrUpdateOrDeleteSettingValue(name, value, userId);
+        clearUserCache(userId);
+    }
+
+    @CacheEvict(ApplicationSettingsCacheKey)
+    public void clearUserCache(String userId) {
+    }
+
+    private SettingInfo insertOrUpdateOrDeleteSettingValue(String name, String value, String userId) {
         SettingDefinition settingDefinition = _settingDefinitionManager.getSettingDefinition(name);
         SettingInfo settingValue = settingStore.getSettingOrNull(name, userId);
 
@@ -168,7 +187,7 @@ public class SettingManager implements ISettingManager {
         return settingInfoMap.getOrDefault(name, null);
     }
 
-    @Cacheable(cacheNames = "settingManager.getApplicationSettingsFromCache")
+    @Cacheable(cacheNames = ApplicationSettingsCacheKey)
     public Map<String, SettingInfo> getApplicationSettingsFromCache() {
         List<SettingInfo> settingValues = settingStore.getAllList();
         return convertSettingInfosToDictionary(settingValues);
@@ -182,7 +201,7 @@ public class SettingManager implements ISettingManager {
         return getUserSettingsFromCache(userId);
     }
 
-    @Cacheable(cacheNames = "settingManager.getUserSettingsFromCache", key = "#userId")
+    @Cacheable(cacheNames = ApplicationSettingsCacheKey, key = "#userId")
     public Map<String, SettingInfo> getUserSettingsFromCache(String userId) {
         List<SettingInfo> settingInfos = settingStore.getAllList(userId);
         return convertSettingInfosToDictionary(settingInfos);
