@@ -3,6 +3,7 @@ package com.canknow.cbp.base.settings;
 import com.canknow.cbp.base.runtime.session.IApplicationSession;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -123,8 +124,8 @@ public class SettingManager implements ISettingManager {
     }
 
     public List<SettingValue> getAllSettingValuesForApplication() {
-        return (getSettings()).values().stream().map(setting -> new SettingValue(setting.getName(), setting.getValue()))
-                    .collect(Collectors.toList());
+        return getApplicationSettingsFromCache().values().stream().map(settingInfo ->
+                new SettingValue(settingInfo.getName(), settingInfo.getValue())).collect(Collectors.toList());
     }
 
     private String getSettingValueInternal(String name, String userId, boolean fallbackToDefault) {
@@ -163,11 +164,12 @@ public class SettingManager implements ISettingManager {
     }
 
     private SettingInfo getSettingValueForApplicationOrNull(String name) {
-        Map<String, SettingInfo> settingInfoMap = getSettings();
+        Map<String, SettingInfo> settingInfoMap = getApplicationSettingsFromCache();
         return settingInfoMap.getOrDefault(name, null);
     }
 
-    private Map<String, SettingInfo> getSettings() {
+    @Cacheable(cacheNames = "settingManager.getApplicationSettingsFromCache")
+    public Map<String, SettingInfo> getApplicationSettingsFromCache() {
         List<SettingInfo> settingValues = settingStore.getAllList();
         return convertSettingInfosToDictionary(settingValues);
     }
@@ -177,6 +179,11 @@ public class SettingManager implements ISettingManager {
     }
 
     private Map<String, SettingInfo> getReadOnlyUserSettings(String userId) {
+        return getUserSettingsFromCache(userId);
+    }
+
+    @Cacheable(cacheNames = "settingManager.getUserSettingsFromCache", key = "#userId")
+    public Map<String, SettingInfo> getUserSettingsFromCache(String userId) {
         List<SettingInfo> settingInfos = settingStore.getAllList(userId);
         return convertSettingInfosToDictionary(settingInfos);
     }
