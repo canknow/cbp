@@ -47,18 +47,30 @@ public class SettingManager implements ISettingManager {
 
     @Override
     public void changeSetting(String name, String value) {
-        insertOrUpdateOrDeleteSettingValue(name, value, null);
+        SettingDefinition settingDefinition = _settingDefinitionManager.getSettingDefinition(name);
+
+        if (settingDefinition.getScopes().hasFlag(SettingScopes.User)) {
+            changeSettingForUser(applicationSession.getUserId(), name, value);
+        }
+        else {
+            changeSettingForApplication(name, value);
+        }
     }
 
     @Override
     public void changeSettingForApplication(String name, String value) {
         insertOrUpdateOrDeleteSettingValue(name, value, null);
+        clearApplicationCache();
     }
 
     @Override
     public void changeSettingForUser(String userId, String name, String value) {
         insertOrUpdateOrDeleteSettingValue(name, value, userId);
         clearUserCache(userId);
+    }
+
+    @CacheEvict(ApplicationSettingsCacheKey)
+    public void clearApplicationCache() {
     }
 
     @CacheEvict(ApplicationSettingsCacheKey)
@@ -81,7 +93,6 @@ public class SettingManager implements ISettingManager {
 
         //If it's not default value and not stored on database, then insert it
         if (settingValue == null) {
-
             settingValue = new SettingInfo(name, value, userId);
             settingStore.create(settingValue);
             return settingValue;
