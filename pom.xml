@@ -7,13 +7,13 @@
     <properties>
         <java.version>1.8</java.version>
         <springfox.version>2.9.2</springfox.version>
-        <cbp.version>0.1.5-SNAPSHOT</cbp.version>
+        <cbp.version>0.1.6-SNAPSHOT</cbp.version>
     </properties>
 
     <groupId>com.canknow</groupId>
     <artifactId>cbp</artifactId>
     <packaging>pom</packaging>
-    <version>0.1.5-SNAPSHOT</version>
+    <version>0.1.6-SNAPSHOT</version>
     <name>cbp</name>
     <description>Canknow boilerplate</description>
 
@@ -26,6 +26,7 @@
         <module>web-common</module>
         <module>socket</module>
         <module>infrastructure</module>
+        <module>email</module>
     </modules>
 
     <parent>
